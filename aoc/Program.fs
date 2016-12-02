@@ -24,7 +24,7 @@ type Direction(dir: CardinalDirection) =
         | South -> Direction(CardinalDirection.East)
         | East -> Direction(CardinalDirection.North)
 
-let move pos (dir:Direction) steps = 
+let step pos (dir:Direction) steps = 
     let x,y = pos
     match dir.Direction with
     | North -> 
@@ -61,20 +61,18 @@ let day1 (input:string) =
             | None -> (total, 0)
         | head::tail -> 
             let cmddir = head.Chars(0)
-            let steps = int head.[1..]
+            let move direction =
+                let steps = int head.[1..] 
+                let newpos = List.tail (step pos direction steps)
+                let allpos = prevpos @ newpos
+                match duplicate with
+                | Some p -> calc (Seq.last allpos) direction tail allpos duplicate
+                | None -> calc (Seq.last allpos) direction tail allpos (firstduplicate prevpos newpos)
             match cmddir with
             | 'L' -> 
-                let newpos = List.tail (move pos dir.Left steps)
-                let allpos = prevpos @ newpos
-                match duplicate with
-                | Some p -> calc (Seq.last allpos) dir.Left tail allpos duplicate
-                | None -> calc (Seq.last allpos) dir.Left tail allpos (firstduplicate prevpos newpos)
+                move dir.Left
             | 'R' -> 
-                let newpos = List.tail (move pos dir.Right steps)
-                let allpos = prevpos @ newpos
-                match duplicate with
-                | Some p -> calc (Seq.last allpos) dir.Left tail allpos duplicate
-                | None -> calc (Seq.last allpos) dir.Right tail allpos (firstduplicate prevpos newpos)
+                move dir.Right
             | _ -> failwith "Unknown command"
     calc (0,0) startDir commands [] None
 
